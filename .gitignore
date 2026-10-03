@@ -1,0 +1,8 @@
+# Track only the published site and this ignore configuration.
+/*
+!/.gitignore
+!/docs/
+
+# macOS metadata files, wherever they appear.
+._*
+.DS_Store
