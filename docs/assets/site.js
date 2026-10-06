@@ -143,6 +143,9 @@
   });
 
   if (shown) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-local-rubric]'), function (n) {
+      if (n.closest('.year').querySelector('.meet__local')) n.textContent = n.getAttribute('data-local-rubric');
+    });
     Array.prototype.forEach.call(document.querySelectorAll('.your-time-note'), function (n) { n.hidden = false; });
     var reveal = function () {
       Array.prototype.forEach.call(document.querySelectorAll('.meet__local'), function (n) { n.classList.add('is-in'); });
