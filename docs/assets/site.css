@@ -1411,3 +1411,140 @@ figure.split__aside { padding-top: 0; border: 0; margin: 0; }
   .page-alumni .thesis { grid-template-columns: 3rem minmax(0, 1fr); gap: 0.75rem; }
 }
 .page-students .page-head__rubric a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ── Online application (/apply/) ────────────────────────────────────────
+   Behaviour in src/assets/js/application.js; markup in scripts/lib/application.mjs.
+   A printed form: each part opens on a 2px harbour rule, choices are ruled
+   rows, instructions are rubrics, an empty upload is a dashed outline. */
+.af-wrap { max-width: 52rem; }
+.af-nojs { font-style: italic; color: var(--rubric); }
+.af-lede { font-style: italic; color: var(--rubric); max-width: 62ch; }
+.af-set { border: 0; margin: 2.75rem 0 0; padding: 1.1rem 0 0; min-width: 0; border-top: 2px solid var(--harbour); }
+.af-set legend { float: left; width: 100%; padding: 0; margin-bottom: 1.25rem; font-family: var(--sans); font-weight: 600; font-size: var(--step-1); line-height: 1.25; color: var(--heading); }
+.af-set legend + * { clear: both; }
+.af-note { font-style: italic; color: var(--rubric); font-size: var(--step--1); line-height: 1.5; max-width: 62ch; margin: 0 0 1rem; }
+.af-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1.5rem; margin-bottom: 1.25rem; }
+.af-grid--3 { grid-template-columns: 1.1fr 1.1fr 1fr; }
+.af-span { grid-column: 1 / -1; }
+.af-field { margin-bottom: 1.1rem; }
+.af-grid > .af-field, .af-edu-row > .af-field { margin-bottom: 0; }
+.af-field > label:not(.af-check), .af-q {
+  display: block; margin: 0 0 0.4rem; font-family: var(--sans); font-weight: 500; font-size: var(--step--1);
+  letter-spacing: 0.02em; line-height: 1.35; color: var(--text-dark);
+}
+.af-q--sub { margin: 1.75rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-weight: 600; color: var(--heading); }
+.af-opt { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: 0; color: var(--meta); margin-left: 0.3em; }
+.af input:not([type="radio"], [type="checkbox"], [type="file"]), .af textarea, .af select {
+  display: block; width: 100%; min-height: 44px; padding: 0.55rem 0.75rem;
+  font: inherit; font-size: var(--step-0); line-height: 1.4; color: var(--text-dark);
+  background: #FFFFFF; border: 1px solid var(--harbour-soft); border-radius: 2px;
+  transition: border-color 0.2s ease;
+}
+.af textarea { resize: vertical; min-height: 6rem; }
+.af select { appearance: none; padding-right: 2.5rem; cursor: pointer;
+  background: #FFFFFF url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%237B3F49' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 0.75rem center / 1rem; }
+.af select:disabled { color: var(--meta); background-color: var(--cream-warm); cursor: not-allowed; }
+.af :is(input, textarea, select):hover { border-color: var(--harbour); }
+.af :is(input, textarea, select, button):focus-visible, .af-state:focus-visible, .af-error:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.af [aria-invalid="true"] { border-color: var(--oxblood) !important; }
+.af :is(input:not([type="radio"], [type="checkbox"]), textarea, select)[aria-invalid="true"] { box-shadow: inset 3px 0 0 var(--oxblood); }
+.af-error-msg { margin: 0.4rem 0 0; font-family: var(--sans); font-size: var(--step--1); font-weight: 500; color: var(--oxblood); line-height: 1.4; }
+.af-start-note { margin: 0.5rem 0 0; }
+.af-field--start { max-width: 24rem; margin-top: 1.5rem; }
+
+/* Choices: ruled rows, the chosen one on cream-warm. */
+.af-choices { margin: 0 0 1.5rem; }
+.af-choices:last-child { margin-bottom: 0; }
+.af-choice { display: grid; grid-template-columns: 1.25rem 1fr; gap: 0.85rem; align-items: start; padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--rule); cursor: pointer; transition: background-color 0.2s ease; }
+.af-choices > .af-q + .af-choice, .af-choices > .af-note + .af-choice { border-top: 1px solid var(--rule); }
+.af-choice:hover { background: var(--cream-warm); }
+.af-choice:has(input:checked) { background: var(--cream-warm); }
+.af-choice strong { display: block; font-family: var(--sans); font-weight: 500; font-size: var(--step-0); line-height: 1.35; color: var(--text-dark); }
+.af-choice em { display: block; margin-top: 0.15rem; font-size: var(--step--1); line-height: 1.45; color: var(--text); }
+.af-choice input, .af-check input {
+  appearance: none; margin: 0.2rem 0 0; width: 1.25rem; height: 1.25rem; display: grid; place-content: center;
+  background: #FFFFFF; border: 1.5px solid var(--harbour-soft); cursor: pointer;
+}
+.af-choice input { border-radius: 50%; }
+.af-choice input::before { content: ""; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--oxblood); transform: scale(0); transition: transform 0.15s var(--ease-out); }
+.af-choice input:checked { border-color: var(--oxblood); }
+.af-choice input:checked::before { transform: scale(1); }
+.af-choices.has-error .af-choice input { border-color: var(--oxblood); }
+.af-check { display: grid; grid-template-columns: 1.25rem 1fr; gap: 0.75rem; align-items: start; cursor: pointer; font-size: var(--step-0); line-height: 1.45; max-width: 62ch; }
+.af-check input { border-radius: 2px; }
+.af-check input::before { content: ""; width: 0.7rem; height: 0.4rem; margin-top: -0.15rem; border: solid var(--cream); border-width: 0 0 2px 2px; transform: rotate(-45deg) scale(0); transition: transform 0.15s var(--ease-out); }
+.af-check input:checked { background: var(--oxblood); border-color: var(--oxblood); }
+.af-check input:checked::before { transform: rotate(-45deg) scale(1); }
+.af-field.has-error .af-check input { border-color: var(--oxblood); }
+
+/* Academic history rows. */
+.af-edu-rows { display: grid; gap: 1rem; }
+.af-edu-row { display: grid; grid-template-columns: 2.2fr 1.5fr 0.8fr 2.75rem; gap: 0 1rem; align-items: start; padding-bottom: 1rem; border-bottom: 1px solid var(--hair); }
+.af-edu-row .af-error-msg, .af-edu-rows > .af-error-msg { grid-column: 1 / -1; }
+.af-row-remove { align-self: start; margin-top: 1.55rem; width: 2.75rem; height: 44px; display: grid; place-content: center; padding: 0; background: none; border: 1px solid transparent; border-radius: 2px; color: var(--meta); cursor: pointer; }
+.af-row-remove:hover { color: var(--oxblood); border-color: var(--rule); }
+.af svg { width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.af-add, .af-send, .af-file-remove { font-family: var(--sans); cursor: pointer; }
+.af-add { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; margin-top: 1rem; padding: 0.5em 1em; font-size: var(--step--1); font-weight: 500; color: var(--rubric); background: transparent; border: 1px solid var(--rule); border-radius: 2px; }
+.af-add:hover { background: var(--blush); color: var(--text-dark); border-color: var(--oxblood); }
+.af-theses { margin: 1.5rem 0 0; }
+
+/* References. */
+.af-ref { padding: 1rem 0 0.25rem; border-top: 1px solid var(--rule); }
+.af-ref .af-grid { margin-bottom: 1rem; }
+.af-ref > .af-q { font-family: var(--sans); font-weight: 600; color: var(--heading); }
+
+/* Documents: an empty slot is a dashed outline, as absence is everywhere on the site. */
+.af-doc { padding: 1rem 0 1.25rem; border-top: 1px solid var(--rule); }
+.af-doc .af-note { margin-bottom: 0.75rem; }
+.af-drop { position: relative; border: 1.5px dashed var(--harbour-soft); border-radius: 2px; background: #FFFFFF; transition: background-color 0.2s ease, border-color 0.2s ease; }
+.af-drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.af-drop-label { display: flex; align-items: center; justify-content: center; gap: 0.6rem; min-height: 4rem; padding: 1rem; font-family: var(--sans); font-size: var(--step--1); color: var(--text); text-align: center; pointer-events: none; }
+.af-drop-label strong { color: var(--link); font-weight: 600; text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 0.2em; }
+.af-drop-label svg { color: var(--oxblood); }
+.af-drop:hover, .af-drop.is-over { border-color: var(--oxblood); background: var(--cream-warm); }
+.af-drop:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.af-doc.has-error .af-drop { border-color: var(--oxblood); }
+.af-files { list-style: none; margin: 0; padding: 0; }
+.af-files li { display: flex; align-items: center; gap: 0.7rem; min-height: 3.25rem; padding: 0.5rem 0.75rem; background: #FFFFFF; border: 1px solid var(--harbour-soft); border-radius: 2px; font-family: var(--sans); font-size: var(--step--1); }
+.af-files li svg { color: var(--harbour); }
+.af-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dark); }
+.af-file-size { color: var(--meta); font-variant-numeric: tabular-nums; }
+.af-file-remove { min-height: 44px; padding: 0 0.25rem; background: none; border: 0; font-size: var(--step--1); color: var(--link); text-decoration: underline; text-decoration-color: var(--link-line); text-underline-offset: 0.2em; }
+.af-file-remove:hover { color: var(--link-hover); }
+.af-files .af-file-problem { margin-top: 0.5rem; padding: 0; min-height: 0; background: none; border: 0; color: var(--oxblood); font-weight: 500; }
+.af-doc .af-check { margin-top: 0.75rem; font-size: var(--step--1); }
+.af-sign { max-width: 26rem; margin-top: 1.5rem; }
+
+/* Fee and payment. */
+.af-ledger { width: 100%; max-width: 34rem; border-collapse: collapse; margin-bottom: 0.75rem; font-family: var(--sans); }
+.af-ledger td { padding: 0.75rem 0; border-block: 1px solid var(--rule); vertical-align: baseline; color: var(--text-dark); }
+.af-ledger td:last-child { text-align: right; font-weight: 600; white-space: nowrap; padding-left: 1rem; }
+.af-sub { display: block; font-family: var(--serif); font-style: italic; font-size: var(--step--1); color: var(--meta); }
+.af-pay-lede { max-width: 62ch; margin-bottom: 1rem; }
+.af-paypal { max-width: 26rem; min-height: 3.2rem; }
+.af-pay-status { font-style: italic; color: var(--rubric); margin: 0; }
+.af-pay-status.is-paid { display: flex; align-items: center; gap: 0.5rem; font-style: normal; font-family: var(--sans); font-weight: 500; color: var(--harbour); margin-bottom: 1rem; }
+.af-send { width: 100%; min-height: 48px; padding: 0.6em 1.15em; font-size: var(--step--1); font-weight: 500; color: var(--cream); background: var(--oxblood); border: 1px solid var(--oxblood); border-radius: 2px; transition: background-color 0.25s var(--ease-out); }
+.af-send:hover { background: var(--claret); border-color: var(--claret); }
+.af-error { margin: 0 0 1.25rem; padding: 0.85rem 1rem; background: var(--blush); border-left: 3px solid var(--oxblood); font-size: var(--step--1); line-height: 1.5; color: var(--text-dark); max-width: 40rem; }
+.af-error strong { color: var(--rosewood); font-family: var(--sans); font-weight: 600; }
+.af-privacy { margin-top: 1.5rem; font-size: var(--step--1); color: var(--meta); max-width: 62ch; }
+
+/* Sending, done. */
+.af-state { padding: 2rem 0; border-top: 2px solid var(--harbour); }
+.af-state h3 { font-size: var(--step-2); font-weight: 500; margin-bottom: 0.75rem; }
+.af-state p { max-width: 62ch; }
+.af-sending-rule { height: 2px; max-width: 26rem; margin-top: 1.5rem; background: linear-gradient(90deg, var(--oxblood) 0 30%, var(--rule) 30% 100%); background-size: 200% 100%; animation: af-sending 1.4s linear infinite; }
+@keyframes af-sending { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .af-sending-rule { animation: none; background: var(--oxblood); } }
+.af-facts { display: flex; flex-wrap: wrap; gap: 0.5rem 3rem; margin: 1.5rem 0 0; padding-top: 1rem; border-top: 1px solid var(--rule); font-family: var(--sans); }
+.af-facts dt { font-size: var(--step--1); color: var(--meta); }
+.af-facts dd { margin: 0.15rem 0 0; font-weight: 600; color: var(--heading); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.af-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 720px) {
+  .af-grid, .af-grid--3 { grid-template-columns: 1fr; }
+  .af-edu-row { grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; position: relative; }
+  .af-edu-row > .af-field:first-child { grid-column: 1 / -1; padding-right: 3.25rem; }
+  .af-row-remove { position: absolute; top: 1.4rem; right: 0; margin-top: 0; }
+}
