@@ -292,7 +292,7 @@
 
   var REQUIRED = {
     firstName: 'Enter your first name.', lastName: 'Enter your last name.', email: 'Enter your email address.',
-    phone: 'Enter a phone number.', street: 'Enter your street address.', city: 'Enter your city.',
+    phone: 'Enter a phone number.', dob: 'Enter your date of birth.', street: 'Enter your street address.', city: 'Enter your city.',
     region: 'Enter your province or state.', postal: 'Enter your postal or zip code.', country: 'Enter your country.',
     firstLanguage: 'Enter your first language.',
     personalName: 'Enter your personal referee’s name.', personalRelation: 'Say how your personal referee knows you.',
@@ -322,6 +322,14 @@
     $all('[aria-invalid]', form).forEach(function (e) { e.removeAttribute('aria-invalid'); e.removeAttribute('aria-errormessage'); });
   }
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  /** A YYYY-MM-DD date from 1920 up to 16 years ago. */
+  function plausibleBirthDate(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) return false;
+    var born = new Date(+m[1], +m[2] - 1, +m[3]);
+    var latest = new Date(); latest.setFullYear(latest.getFullYear() - 16);
+    return born.getMonth() === +m[2] - 1 && +m[1] >= 1920 && born <= latest;
+  }
 
   /** Returns the first problem element, or null when the form is complete. */
   function validate() {
@@ -330,8 +338,9 @@
     function fail(el, msg) { setError(el, msg); if (!first) first = el; }
     function need(name, msg) { var el = form.elements[name]; if (el && visible(el) && !val(name)) fail(el, msg || REQUIRED[name]); }
 
-    ['firstName', 'lastName', 'email', 'phone', 'street', 'city', 'region', 'postal', 'country'].forEach(function (n) { need(n); });
+    ['firstName', 'lastName', 'email', 'phone', 'dob', 'street', 'city', 'region', 'postal', 'country'].forEach(function (n) { need(n); });
     if (val('email') && !EMAIL.test(val('email'))) fail(form.elements.email, 'Check your email address; it should look like name@example.com.');
+    if (val('dob') && !plausibleBirthDate(val('dob'))) fail(form.elements.dob, 'Check your date of birth.');
     need('permanentAddress', 'Enter your permanent address, or tick “same as my mailing address”.');
 
     if (!val('program')) fail(form.elements.program[0], 'Choose a program.');
@@ -415,7 +424,7 @@
     var p = program();
     var data = {
       ref: ref, orderId: paidOrderId, fee: paidFee,
-      firstName: val('firstName'), lastName: val('lastName'), email: val('email'), phone: val('phone'),
+      firstName: val('firstName'), lastName: val('lastName'), email: val('email'), phone: val('phone'), dob: val('dob'),
       street: val('street'), city: val('city'), region: val('region'), postal: val('postal'), country: val('country'),
       permanentAddress: val('sameAddress') ? '' : val('permanentAddress'),
       program: val('program'), concentration: form.elements.concentration && visible(form.elements.concentration[0]) ? val('concentration') : '',
