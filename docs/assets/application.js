@@ -52,6 +52,11 @@
   var eduTemplate = document.getElementById('af-edu-template');
   var eduAdd = document.getElementById('af-edu-add');
   var startSelect = form.elements.start;
+  // The financial aid appendix (MA/PhD only; absent on the education form).
+  var aidPart = document.getElementById('part-aid') || form.querySelector('.af-aid');
+  var expRows = document.getElementById('af-exp-rows');
+  var expTemplate = document.getElementById('af-exp-template');
+  var expAdd = document.getElementById('af-exp-add');
 
   var docs = {};           // uploaded File per document slot, keyed by data-doc
   var attempted = false;   // show inline errors live once a send was attempted
@@ -107,7 +112,7 @@
   function saveDraft() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function () {
-      var data = { ref: ref, paidOrderId: paidOrderId, paidFee: paidFee, fields: {}, education: readEducation(true) };
+      var data = { ref: ref, paidOrderId: paidOrderId, paidFee: paidFee, fields: {}, education: readEducation(true), expenses: readExpenses(true) };
       $all('input[name], textarea[name], select[name]', form).forEach(function (el) {
         if (el.type === 'radio') { if (el.checked) data.fields[el.name] = el.value; }
         else if (el.type === 'checkbox') data.fields[el.name] = el.checked;
@@ -170,6 +175,87 @@
     addEduRow().querySelector('input').focus();
   });
 
+  /* ── Financial aid: amounts, totals, expense rows ────────────────────────── */
+
+  var INCOME_REQUIRED = ['incomeLast', 'incomeThis', 'incomeNext'];
+  var MAX_EXP_ROWS = 8;
+  var AMOUNT_HELP = 'Enter an amount in numbers, like 1200 or 1,200.50.';
+  /** '' when blank, a number when it reads as an amount, NaN when it doesn't. */
+  function amount(v) {
+    var t = String(v || '').replace(/[\s,$]/g, '');
+    if (!t) return '';
+    return /^\d{1,9}(\.\d{1,2})?$/.test(t) ? Number(t) : NaN;
+  }
+  function amountText(n) { return n.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function syncTotals() {
+    if (!aidPart) return;
+    var currency = val('aidCurrency') || 'CAD';
+    $all('[data-total]', aidPart).forEach(function (out) {
+      var sum = 0;
+      $all('[data-book="' + out.getAttribute('data-total') + '"]', aidPart).forEach(function (input) {
+        var n = amount(input.value);
+        if (typeof n === 'number' && !isNaN(n) && visible(input)) sum += n;
+      });
+      out.textContent = currency + ' ' + amountText(Math.round(sum * 100) / 100);
+    });
+  }
+
+  var expCount = 0;
+  function addExpRow(data) {
+    var row = expTemplate.content.firstElementChild.cloneNode(true);
+    var n = expCount++;
+    $all('.af-field', row).forEach(function (field) {
+      var input = field.querySelector('input');
+      var id = 'af-exp-' + n + '-' + input.getAttribute('data-exp');
+      input.id = id;
+      field.querySelector('label').setAttribute('for', id);
+      if (data) input.value = data[input.getAttribute('data-exp')] || '';
+    });
+    row.querySelector('.af-row-remove').addEventListener('click', function () {
+      row.remove();
+      syncExp();
+      syncTotals();
+      saveDraft();
+      revalidate();
+      var first = expRows.querySelector('input');
+      if (first) first.focus();
+    });
+    expRows.appendChild(row);
+    syncExp();
+    return row;
+  }
+  function syncExp() {
+    var rows = $all('.af-exp-row', expRows);
+    rows.forEach(function (r) { r.querySelector('.af-row-remove').hidden = rows.length === 1; });
+    expAdd.hidden = rows.length >= MAX_EXP_ROWS;
+  }
+  function readExpenses(all) {
+    if (!expRows) return [];
+    return $all('.af-exp-row', expRows).map(function (r) {
+      return { item: r.querySelector('[data-exp="item"]').value.trim(), amount: r.querySelector('[data-exp="amount"]').value.trim() };
+    }).filter(function (o) { return all || o.item || o.amount; });
+  }
+  if (expAdd) expAdd.addEventListener('click', function () {
+    addExpRow().querySelector('input').focus();
+  });
+
+  /** The appendix's answers, in the shape _scripts/ma-phd-aid.gs reads. */
+  function readAid() {
+    var a = {
+      marital: val('aidMarital'), dependents: val('aidDependents'), dependentAges: shownVal('aidDependentAges'),
+      currency: val('aidCurrency'), loans: {}, amounts: {}, details: {},
+      expenses: readExpenses().map(function (o) { return { item: o.item, amount: amount(o.amount) }; }),
+      declaration: !!val('aidDeclaration'), signature: val('aidSignature'), spouseSignature: shownVal('aidSpouseSignature')
+    };
+    $all('[data-loan]', aidPart).forEach(function (el) { a.loans[el.getAttribute('data-loan')] = el.value.trim(); });
+    $all('[data-amount]', aidPart).filter(visible).forEach(function (el) {
+      var n = amount(el.value);
+      if (n !== '') a.amounts[el.getAttribute('data-amount')] = n;
+    });
+    $all('[data-detail]', aidPart).forEach(function (el) { a.details[el.getAttribute('data-detail')] = el.value.trim(); });
+    return a;
+  }
+
   /* ── Start terms and the fee ─────────────────────────────────────────────── */
 
   /** The next few start terms the chosen program offers, each with its deadline. */
@@ -210,6 +296,11 @@
       ? 'The deadline for ' + esc(t.label) + ' was ' + longDate(t.deadline) + '. Late applications are considered at the admissions committee’s discretion, and the fee is ' + money(CONFIG.LATE_FEE) + '.'
       : 'Apply by ' + longDate(t.deadline) + ' for ' + esc(t.label) + '.';
     note.hidden = !t;
+    var aidLate = document.getElementById('af-aid-late');
+    if (aidLate) {
+      aidLate.hidden = !(t && t.late);
+      aidLate.textContent = t && t.late ? 'The financial aid deadline for ' + t.label + ' was ' + longDate(t.deadline) + '. Late applications aren’t usually eligible for aid, but you can still send this one.' : '';
+    }
     var shown = paidFee || fee();
     document.getElementById('af-fee-label').innerHTML = (shown === CONFIG.LATE_FEE ? 'Late application fee' : 'Application fee') +
       ' <span class="af-sub">non-refundable</span>';
@@ -231,6 +322,12 @@
     $all('[data-referee]', form).forEach(function (row) {
       row.hidden = Number(row.getAttribute('data-referee')) > (p ? p.referees : fewest);
     });
+    // The page's jump bar lists a part only while it's shown.
+    $all('.ap-jump__list [data-part] a').forEach(function (a) {
+      var part = document.getElementById(a.getAttribute('href').slice(1));
+      if (part) a.parentNode.hidden = part.hidden;
+    });
+    syncTotals();
   }
 
   /* ── Document uploads (one file per slot) ────────────────────────────────── */
@@ -398,6 +495,28 @@
       if (!docs[key] && !(later && later.checked)) fail(slot.querySelector('input[type="file"]'), slot.getAttribute('data-missing'));
     });
 
+    if (aidPart && visible(aidPart)) {
+      need('aidMarital', 'Choose your marital status.');
+      need('aidDependents', 'Say how many dependents you have.');
+      need('aidDependentAges', 'Give your dependents’ ages.');
+      need('aidCurrency', 'Say which currency these amounts are in.');
+      $all('[data-amount]', aidPart).filter(visible).forEach(function (el) {
+        var n = amount(el.value);
+        if (typeof n === 'number' && isNaN(n)) fail(el, AMOUNT_HELP);
+        else if (n === '' && INCOME_REQUIRED.indexOf(el.getAttribute('data-amount')) !== -1) fail(el, 'Enter this amount, or 0 if you have none.');
+      });
+      $all('.af-exp-row', expRows).forEach(function (r) {
+        var item = r.querySelector('[data-exp="item"]'), cost = r.querySelector('[data-exp="amount"]');
+        var n = amount(cost.value);
+        if (typeof n === 'number' && isNaN(n)) fail(cost, AMOUNT_HELP);
+        else if (item.value.trim() && n === '') fail(cost, 'Enter the amount for this expense.');
+        else if (!item.value.trim() && n !== '') fail(item, 'Say what this expense is.');
+      });
+      need('aidDeclaration', 'Confirm the financial aid declaration.');
+      need('aidSignature', 'Type your full name to sign your financial aid application.');
+      need('aidSpouseSignature', 'Your spouse signs by typing their full name.');
+    }
+
     need('transcripts', 'Confirm that you will arrange for your transcripts to be sent.');
     need('references', 'Confirm that your referees have agreed to write for you.');
     need('declaration', 'Confirm that your application is complete and accurate.');
@@ -466,6 +585,7 @@
       signature: val('signature'),
       documents: {}
     };
+    if (aidPart && data.financialAid === 'yes') data.aid = readAid();
     var slots = activeDocs();
     return Promise.all(slots.map(function (slot) {
       var key = slot.getAttribute('data-doc');
@@ -522,6 +642,7 @@
       '<p>We’ve emailed a confirmation to <strong>' + esc(val('email')) + '</strong>, and your PayPal receipt will arrive separately. ' +
       (later.length ? 'Please email your ' + esc(listText(later).toLowerCase()) + ' to <a href="mailto:' + REGISTRAR + '?subject=' + encodeURIComponent('Application documents (' + ref + ')') + '">' + REGISTRAR + '</a>, quoting your reference. ' : '') +
       'We’ve also emailed each of your referees a private link to submit their letter, and we’ll let you know as each one arrives. ' +
+      (aidPart && shownVal('financialAid') === 'yes' ? 'Your financial aid application has gone to the Financial Aid Committee. ' : '') +
       'Your application is complete once your transcripts and reference letters are in, and the Academic Registrar will write to you about admission.</p>' +
       '<dl class="af-facts"><div><dt>Your reference</dt><dd>' + esc(ref) + '</dd></div>' +
       '<div><dt>PayPal order</dt><dd>' + esc(paidOrderId) + '</dd></div></dl>' +
@@ -636,6 +757,7 @@
   restoreDraft(['start']);  // start options exist only once the program is known
   syncFee();
   (draft.education && draft.education.length ? draft.education : [null]).forEach(addEduRow);
+  if (expRows) (draft.expenses && draft.expenses.length ? draft.expenses : [null]).forEach(addExpRow);
   $all('.af-doc', form).forEach(setupDoc);
   syncConditions();
 
@@ -648,8 +770,17 @@
     if (strong && /attention/.test(strong.textContent)) strong.textContent = count === 1 ? 'One answer needs attention' : count + ' answers need attention';
   }
 
-  form.addEventListener('input', function () { saveDraft(); revalidate(); });
+  form.addEventListener('input', function (e) {
+    if (aidPart && aidPart.contains(e.target)) syncTotals();
+    saveDraft();
+    revalidate();
+  });
   form.addEventListener('change', function (e) {
+    // An amount that reads as one is tidied: "1200" becomes "1,200.00".
+    if (e.target.matches('[data-amount], [data-exp="amount"]')) {
+      var n = amount(e.target.value);
+      if (typeof n === 'number' && !isNaN(n)) e.target.value = amountText(n);
+    }
     if (e.target.name === 'program') syncTerms();
     if (e.target.name === 'start') syncFee();
     if (e.target.type === 'radio' || e.target.type === 'checkbox' || e.target.tagName === 'SELECT') syncConditions();

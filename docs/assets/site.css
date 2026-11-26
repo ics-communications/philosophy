@@ -1531,6 +1531,35 @@ figure.split__aside { padding-top: 0; border: 0; margin: 0; }
 .af-error strong { color: var(--rosewood); font-family: var(--sans); font-weight: 600; }
 .af-privacy { margin-top: 1.5rem; font-size: var(--step--1); color: var(--meta); max-width: 62ch; }
 
+/* Financial aid application: the paper form's four columns as ruled
+   ledgers, figures set right in tabular numerals, each with its total. */
+.af-aid-late { font-style: normal; font-weight: 600; color: var(--oxblood); }
+.af-aid-currency { max-width: 14rem; }
+.af-aid textarea { max-width: 44rem; min-height: 4.4rem; }
+.af-books { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem 2.5rem; margin: 1.5rem 0 0.5rem; }
+.af-book__title { margin: 0 0 0.35rem; font-family: var(--sans); font-weight: 600; font-size: var(--step-0); color: var(--heading); }
+.af-line { display: grid; grid-template-columns: minmax(0, 1fr) 8.75rem; align-items: center; gap: 0.35rem 1rem; margin: 0; padding: 0.45rem 0; border-bottom: 1px solid var(--hair); }
+.af-line > label:not(.af-check) { margin: 0; letter-spacing: 0; }
+.af-line > .af-error-msg { grid-column: 1 / -1; }
+.af-amount input { text-align: right; font-variant-numeric: tabular-nums lining-nums; }
+.af-line-detail { margin: 0; padding: 0.15rem 0 0.7rem; border-bottom: 1px solid var(--hair); }
+.af-line-detail > label:not(.af-check) { color: var(--meta); }
+.af-book__total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: -1px 0 0; padding-top: 0.75rem; border-top: 2px solid var(--harbour); font-family: var(--sans); }
+.af-book__total span { font-size: var(--step--1); font-weight: 500; color: var(--meta); }
+.af-book__total output { font-weight: 600; font-size: var(--step-1); color: var(--heading); font-variant-numeric: lining-nums; overflow-wrap: anywhere; text-align: right; }
+.af-exp-row { display: grid; grid-template-columns: minmax(0, 1fr) 8.75rem 2.75rem; gap: 0 1rem; align-items: start; padding: 0.6rem 0; border-bottom: 1px solid var(--hair); }
+.af-exp-row > .af-field { margin-bottom: 0; }
+.af-book .af-add { margin-bottom: 1rem; }
+.af-aid-sign { max-width: 44rem; margin-top: 1.5rem; }
+@media (max-width: 900px) {
+  .af-books { grid-template-columns: 1fr; gap: 2rem; }
+}
+@media (max-width: 720px) {
+  .af-line { grid-template-columns: minmax(0, 1fr) 7.5rem; gap: 0.35rem 0.75rem; }
+  .af-exp-row { grid-template-columns: 1fr; gap: 0.75rem; position: relative; }
+  .af-exp-row > .af-field:first-child { padding-right: 3.25rem; }
+}
+
 /* Sending, done. */
 .af-state { padding: 2rem 0; border-top: 2px solid var(--harbour); }
 .af-state h3 { font-size: var(--step-2); font-weight: 500; margin-bottom: 0.75rem; }

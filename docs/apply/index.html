@@ -208,7 +208,7 @@
         <div class="af-choices" role="radiogroup" aria-labelledby="af-q-financialAid" data-show-when="studyMode=full-time">
           <p class="af-q" id="af-q-financialAid">Financial aid</p>
           <p class="af-note">Full-time students can apply for ICS financial aid. Aid applications are due by the application deadline.</p>
-          <label class="af-choice"><input type="radio" name="financialAid" value="yes"><span><strong>Yes, I’m applying for financial aid</strong><em>Add the financial aid application under Documents.</em></span></label>
+          <label class="af-choice"><input type="radio" name="financialAid" value="yes"><span><strong>Yes, I’m applying for financial aid</strong><em>Fill in the financial aid application near the end of this form.</em></span></label>
           <label class="af-choice"><input type="radio" name="financialAid" value="no"><span><strong>No</strong></span></label>
         </div>
           <p class="af-note" data-show-when="studyMode=part-time">ICS financial aid is open to full-time students only.</p>
@@ -318,16 +318,6 @@
           <ul class="af-files" aria-live="polite"></ul>
           <label class="af-check"><input type="checkbox" name="ieltsLater" value="yes"><span>I’ll email it to the Academic Registrar separately</span></label>
         </div>
-        <div class="af-doc" data-doc="aid" data-name="Financial aid application" data-types="pdf jpg jpeg png" data-missing="Upload your financial aid application, or tick the box to send it separately." data-show-when="financialAid=yes">
-          <p class="af-q" id="af-q-aid">Financial aid application</p>
-          <p class="af-note"><a href="https://drive.google.com/file/d/1N7lsqt69QIzRlRFoZTKkLYZPU-wxTBEM/view" target="_blank" rel="noopener">Download the form</a> (PDF), fill it in on your computer or print and scan it, and upload it here as one PDF.</p>
-          <div class="af-drop">
-            <input type="file" id="af-file-aid" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="af-q-aid">
-            <label for="af-file-aid" class="af-drop-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg><span><strong>Choose a file</strong> or drop it here</span></label>
-          </div>
-          <ul class="af-files" aria-live="polite"></ul>
-          <label class="af-check"><input type="checkbox" name="aidLater" value="yes"><span>I’ll email it to the Academic Registrar separately</span></label>
-        </div>
         </fieldset>
 
         <fieldset class="af-set">
@@ -337,6 +327,90 @@
           <div class="af-field"><label class="af-check"><input type="checkbox" name="references" value="yes"><span>My referees have agreed to write for me, and I understand ICS will email them a link to submit their letters.</span></label></div>
           <div class="af-field"><label class="af-check"><input type="checkbox" name="declaration" value="yes"><span>The information in this application is complete and accurate.</span></label></div>
           <div class="af-field af-sign"><label for="af-signature">Signature <span class="af-opt">type your full name</span></label><input id="af-signature" name="signature" autocomplete="name" maxlength="200"></div>
+        </fieldset>
+
+
+        <fieldset class="af-set af-aid" data-show-when="financialAid=yes">
+          <legend>Financial aid application</legend>
+          <p class="af-note">Your application for ICS financial aid. It’s kept apart from the rest of your application and held in confidence by the Financial Aid Committee. It’s due with your application, by the application deadline. If you’re awarded aid, we’ll ask for your SIN or SSN.</p>
+          <p class="af-note af-aid-late" id="af-aid-late" hidden></p>
+
+          <p class="af-q af-q--sub">Household</p>
+          <p class="af-note">We’ll use the name, address, email, and phone number you gave above.</p>
+          <div class="af-grid af-grid--3">
+            <div class="af-field"><label for="af-aid-marital">Marital status</label><select id="af-aid-marital" name="aidMarital"><option value="">Choose one</option><option value="single">Single</option><option value="married">Married</option><option value="common-law">Common-law</option><option value="separated">Separated</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option></select></div>
+            <div class="af-field"><label for="af-aid-dependents">Dependents</label><select id="af-aid-dependents" name="aidDependents"><option value="">Choose one</option><option value="0">None</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6+">6 or more</option></select></div>
+            <div class="af-field" data-show-when="aidDependents!=|0"><label for="af-aid-ages">Their ages</label><input id="af-aid-ages" name="aidDependentAges" autocomplete="off" maxlength="200" placeholder="e.g. 4, 7"></div>
+          </div>
+
+          <p class="af-q af-q--sub">Loans and other funding</p>
+          <p class="af-note">Have you applied for student aid from any of these sources? For each, say which program and the status or result of your application.</p>
+          <div class="af-field"><label for="af-aid-loansCanada">Canadian student loans <span class="af-opt">if any</span></label>
+            <p class="af-note" id="af-aid-loansCanada-note">Canada Student Loans, or provincial loans such as OSAP.</p><textarea id="af-aid-loansCanada" name="aid_loansCanada" data-loan="loansCanada" rows="2" maxlength="1000" aria-describedby="af-aid-loansCanada-note"></textarea></div>
+          <div class="af-field"><label for="af-aid-loansInternational">International student loans <span class="af-opt">if any</span></label><textarea id="af-aid-loansInternational" name="aid_loansInternational" data-loan="loansInternational" rows="2" maxlength="1000"></textarea></div>
+          <div class="af-field"><label for="af-aid-loansUS">US student loans <span class="af-opt">if any</span></label>
+            <p class="af-note" id="af-aid-loansUS-note">ICS doesn’t take part in the US Department of Education’s Direct Loan Program, so you can’t take out new US federal loans while you study here. ICS can sign deferment forms for loans you already have, so you won’t have to start repaying them while you study full-time at ICS.</p><textarea id="af-aid-loansUS" name="aid_loansUS" data-loan="loansUS" rows="2" maxlength="1000" aria-describedby="af-aid-loansUS-note"></textarea></div>
+          <div class="af-field"><label for="af-aid-otherFunding">Other funding sources <span class="af-opt">if any</span></label><textarea id="af-aid-otherFunding" name="aid_otherFunding" data-loan="otherFunding" rows="2" maxlength="1000"></textarea></div>
+
+          <p class="af-q af-q--sub">Your finances</p>
+          <p class="af-note">Leave blank anything that doesn’t apply, except your income: enter 0 if you have none. Each column adds up as you go.</p>
+          <div class="af-field af-aid-currency"><label for="af-aid-currency">Currency of these amounts</label><input id="af-aid-currency" name="aidCurrency" autocomplete="off" maxlength="20" value="CAD"></div>
+          <div class="af-books">
+            <div class="af-book" role="group" aria-labelledby="af-book-assets">
+              <p class="af-book__title" id="af-book-assets">Assets</p>
+              <div class="af-field af-line"><label for="af-aid-cash">Cash and short-term investments</label><span class="af-amount"><input id="af-aid-cash" name="aid_cash" data-amount="cash" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-savings">Retirement and other savings</label><span class="af-amount"><input id="af-aid-savings" name="aid_savings" data-amount="savings" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-securities">Stocks, bonds, and other securities</label><span class="af-amount"><input id="af-aid-securities" name="aid_securities" data-amount="securities" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-realEstate">Real estate</label><span class="af-amount"><input id="af-aid-realEstate" name="aid_realEstate" data-amount="realEstate" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-vehicles">Vehicles</label><span class="af-amount"><input id="af-aid-vehicles" name="aid_vehicles" data-amount="vehicles" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-otherAssets">Other assets</label><span class="af-amount"><input id="af-aid-otherAssets" name="aid_otherAssets" data-amount="otherAssets" data-book="assets" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <p class="af-book__total"><span>Total</span><output id="af-total-assets" data-total="assets" aria-live="off">0.00</output></p>
+            </div>
+            <div class="af-book" role="group" aria-labelledby="af-book-liabilities">
+              <p class="af-book__title" id="af-book-liabilities">Liabilities</p>
+              <div class="af-field af-line"><label for="af-aid-housing">Monthly rent or mortgage</label><span class="af-amount"><input id="af-aid-housing" name="aid_housing" data-amount="housing" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-loansSelf">Your student loans</label><span class="af-amount"><input id="af-aid-loansSelf" name="aid_loansSelf" data-amount="loansSelf" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line" data-show-when="aidMarital=married|common-law"><label for="af-aid-loansSpouse">Your spouse’s student loans</label><span class="af-amount"><input id="af-aid-loansSpouse" name="aid_loansSpouse" data-amount="loansSpouse" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-cardsSelf">Your credit card balances</label><span class="af-amount"><input id="af-aid-cardsSelf" name="aid_cardsSelf" data-amount="cardsSelf" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line" data-show-when="aidMarital=married|common-law"><label for="af-aid-cardsSpouse">Your spouse’s credit card balances</label><span class="af-amount"><input id="af-aid-cardsSpouse" name="aid_cardsSpouse" data-amount="cardsSpouse" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-otherLoans">Other loans</label><span class="af-amount"><input id="af-aid-otherLoans" name="aid_otherLoans" data-amount="otherLoans" data-book="liabilities" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <p class="af-book__total"><span>Total</span><output id="af-total-liabilities" data-total="liabilities" aria-live="off">0.00</output></p>
+            </div>
+            <div class="af-book" role="group" aria-labelledby="af-book-income">
+              <p class="af-book__title" id="af-book-income">Income</p>
+              <div class="af-field af-line"><label for="af-aid-incomeLast">Your gross income, last year</label><span class="af-amount"><input id="af-aid-incomeLast" name="aid_incomeLast" data-amount="incomeLast" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-incomeThis">Your projected gross income, this year</label><span class="af-amount"><input id="af-aid-incomeThis" name="aid_incomeThis" data-amount="incomeThis" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-incomeNext">Your projected gross income, next year</label><span class="af-amount"><input id="af-aid-incomeNext" name="aid_incomeNext" data-amount="incomeNext" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line" data-show-when="aidMarital=married|common-law"><label for="af-aid-spouseLast">Your spouse’s gross income, last year</label><span class="af-amount"><input id="af-aid-spouseLast" name="aid_spouseLast" data-amount="spouseLast" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line" data-show-when="aidMarital=married|common-law"><label for="af-aid-spouseThis">Your spouse’s projected gross income, this year</label><span class="af-amount"><input id="af-aid-spouseThis" name="aid_spouseThis" data-amount="spouseThis" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line" data-show-when="aidMarital=married|common-law"><label for="af-aid-spouseNext">Your spouse’s projected gross income, next year</label><span class="af-amount"><input id="af-aid-spouseNext" name="aid_spouseNext" data-amount="spouseNext" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line"><label for="af-aid-grants">Grants received for next academic year</label><span class="af-amount"><input id="af-aid-grants" name="aid_grants" data-amount="grants" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line-detail"><label for="af-aid-grantsFrom">Which grants <span class="af-opt">if any</span></label><input id="af-aid-grantsFrom" name="aid_grantsFrom" data-detail="grantsFrom" autocomplete="off" maxlength="300"></div>
+              <div class="af-field af-line"><label for="af-aid-grantsPending">Grants applied for, not yet decided</label><span class="af-amount"><input id="af-aid-grantsPending" name="aid_grantsPending" data-amount="grantsPending" data-book="income" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+              <div class="af-field af-line-detail"><label for="af-aid-grantsPendingFrom">Which grants <span class="af-opt">if any</span></label><input id="af-aid-grantsPendingFrom" name="aid_grantsPendingFrom" data-detail="grantsPendingFrom" autocomplete="off" maxlength="300"></div>
+              <p class="af-book__total"><span>Total</span><output id="af-total-income" data-total="income" aria-live="off">0.00</output></p>
+            </div>
+            <div class="af-book" role="group" aria-labelledby="af-book-expenses">
+              <p class="af-book__title" id="af-book-expenses">Extraordinary and housing expenses</p>
+              <div class="af-exp-rows" id="af-exp-rows"></div>
+              <template id="af-exp-template">
+                <div class="af-exp-row">
+                  <div class="af-field"><label>Expense</label><input data-exp="item" maxlength="150" autocomplete="off"></div>
+                  <div class="af-field"><label>Amount</label><span class="af-amount"><input data-exp="amount" data-book="expenses" inputmode="decimal" autocomplete="off" maxlength="16"></span></div>
+                  <button type="button" class="af-row-remove" aria-label="Remove this expense"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                </div>
+              </template>
+              <button type="button" class="af-add" id="af-exp-add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add another expense</button>
+              <p class="af-book__total"><span>Total</span><output id="af-total-expenses" data-total="expenses" aria-live="off">0.00</output></p>
+            </div>
+          </div>
+
+          <p class="af-q af-q--sub">Declaration</p>
+          <div class="af-field"><label class="af-check"><input type="checkbox" name="aidDeclaration" value="yes"><span>I declare that the information in this financial aid application is accurate and that no information has been withheld. I understand that falsifying or omitting information will result in immediate and permanent dismissal from the Institute.</span></label></div>
+          <div class="af-grid af-aid-sign">
+            <div class="af-field"><label for="af-aid-signature">Your signature <span class="af-opt">type your full name</span></label><input id="af-aid-signature" name="aidSignature" autocomplete="name" maxlength="200"></div>
+            <div class="af-field" data-show-when="aidMarital=married|common-law"><label for="af-aid-spouse-signature">Your spouse’s signature <span class="af-opt">they type their full name</span></label><input id="af-aid-spouse-signature" name="aidSpouseSignature" autocomplete="off" maxlength="200"></div>
+          </div>
         </fieldset>
 
         <fieldset class="af-set af-pay">
@@ -361,7 +435,7 @@
   <div class="wrap">
     <h2 id="cost-title" class="section__title">Fees and questions</h2>
     
-    <p>See <a href="https://www.icscanada.edu/admissions/tuition-fees" target="_blank" rel="noopener">current tuition and fees</a>.</p><p><span class="nw">Full-time</span> applicants can apply for ICS financial aid with their application: <a href="https://drive.google.com/file/d/1N7lsqt69QIzRlRFoZTKkLYZPU-wxTBEM/view" target="_blank" rel="noopener">download the financial aid form</a> and add it to the online form. <span class="nw">Part-time</span> students aren’t eligible for ICS aid.</p><p class="rubric">Unsure about your preparation, <span class="nw">part-time</span> study, or supervisor? <a href="mailto:ma-phd-director@icscanada.edu">Write to Neal DeRoo, Program Director</a>.</p>
+    <p>See <a href="https://www.icscanada.edu/admissions/tuition-fees" target="_blank" rel="noopener">current tuition and fees</a>.</p><p><span class="nw">Full-time</span> applicants can apply for ICS financial aid with their application: say you’re applying, and the financial aid application opens as part of the online form. It’s kept apart from the rest of your application, for the Financial Aid Committee. <span class="nw">Part-time</span> students aren’t eligible for ICS aid.</p><p class="rubric">Unsure about your preparation, <span class="nw">part-time</span> study, or supervisor? <a href="mailto:ma-phd-director@icscanada.edu">Write to Neal DeRoo, Program Director</a>.</p>
   </div>
 </section>
 </main>
