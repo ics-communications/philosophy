@@ -83,6 +83,17 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function icon(path) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"/></svg>'; }
   function program() { return CONFIG.PROGRAMS[val('program')] || null; }
+  /** A field's answer, or '' while the field is hidden (a follow-up to an answer since changed). */
+  function shownVal(name) {
+    var el = form.elements[name];
+    if (!el) return '';
+    var first = el.type ? el : el[0];
+    return first && visible(first) ? val(name) : '';
+  }
+  /** "a", "a and b", "a, b and c". */
+  function listText(items) {
+    return items.length < 3 ? items.join(' and ') : items.slice(0, -1).join(', ') + ' and ' + items[items.length - 1];
+  }
   var SCROLL = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   /* Shown by the form's own conditions (the form itself is hidden while sending). */
   function visible(el) { var h = el.closest('[hidden]'); return !h || h === form; }
@@ -212,7 +223,7 @@
       var rule = el.getAttribute('data-show-when');
       var not = rule.indexOf('!=') !== -1;
       var parts = rule.split(not ? '!=' : '=');
-      var match = parts[1].split('|').indexOf(val(parts[0])) !== -1;
+      var match = parts[1].split('|').indexOf(shownVal(parts[0])) !== -1;
       el.hidden = not ? match : !match;
     });
     var p = program();
@@ -346,6 +357,8 @@
     if (!val('program')) fail(form.elements.program[0], 'Choose a program.');
     if (form.elements.concentration && visible(form.elements.concentration[0]) && !val('concentration')) fail(form.elements.concentration[0], 'Choose a concentration.');
     if (!val('start')) fail(startSelect, val('program') ? 'Choose when you would like to start.' : 'Choose your program, then your start term.');
+    need('studyMode', 'Choose full-time or part-time study.');
+    if (form.elements.financialAid && visible(form.elements.financialAid[0]) && !val('financialAid')) fail(form.elements.financialAid[0], 'Say whether you are applying for financial aid.');
 
     var edu = readEducation();
     var firstEduInput = eduRows.querySelector('input');
@@ -358,15 +371,26 @@
     need('firstLanguage');
     if (!val('english')) fail(form.elements.english[0], 'Tell us how you will show your English proficiency.');
 
+    // Each referee is emailed a link to submit their letter, so every
+    // address must work, and none can be the applicant's own or repeat.
+    var refEmails = {};
+    function refEmail(name) {
+      var v = val(name).toLowerCase(), el = form.elements[name];
+      if (!v) return fail(el, 'Enter this referee’s email address. We’ll email them a link to submit their letter.');
+      if (!EMAIL.test(v)) return fail(el, 'Check this email address; it should look like name@example.com.');
+      if (v === val('email').toLowerCase()) return fail(el, 'This is your own email address. Enter your referee’s.');
+      if (refEmails[v]) return fail(el, 'This is the same address as another referee’s. Each referee needs their own.');
+      refEmails[v] = true;
+    }
     $all('[data-referee]', form).filter(visible).forEach(function (row) {
       var n = row.getAttribute('data-referee');
       if (!val('refName' + n)) fail(form.elements['refName' + n], 'Enter this referee’s name.');
       if (!val('refInstitution' + n)) fail(form.elements['refInstitution' + n], 'Enter this referee’s institution.');
-      if (val('refEmail' + n) && !EMAIL.test(val('refEmail' + n))) fail(form.elements['refEmail' + n], 'Check this email address.');
+      refEmail('refEmail' + n);
     });
     need('personalName');
     need('personalRelation');
-    if (val('personalEmail') && !EMAIL.test(val('personalEmail'))) fail(form.elements.personalEmail, 'Check this email address.');
+    refEmail('personalEmail');
 
     activeDocs().forEach(function (slot) {
       var key = slot.getAttribute('data-doc');
@@ -375,7 +399,7 @@
     });
 
     need('transcripts', 'Confirm that you will arrange for your transcripts to be sent.');
-    need('references', 'Confirm that you will ask your referees to send their letters.');
+    need('references', 'Confirm that your referees have agreed to write for you.');
     need('declaration', 'Confirm that your application is complete and accurate.');
     need('signature');
     return first;
@@ -429,6 +453,7 @@
       permanentAddress: val('sameAddress') ? '' : val('permanentAddress'),
       program: val('program'), concentration: form.elements.concentration && visible(form.elements.concentration[0]) ? val('concentration') : '',
       start: val('start'),
+      studyMode: val('studyMode'), financialAid: shownVal('financialAid'),
       education: readEducation(),
       baccThesis: val('baccThesis'), mastersThesis: val('mastersThesis'),
       firstLanguage: val('firstLanguage'), otherLanguages: val('otherLanguages'), english: val('english'),
@@ -495,8 +520,9 @@
       '<div class="af-done">' +
       '<h3>Thank you, ' + esc(val('firstName')) + '. Your application is in.</h3>' +
       '<p>We’ve emailed a confirmation to <strong>' + esc(val('email')) + '</strong>, and your PayPal receipt will arrive separately. ' +
-      (later.length ? 'Please email your ' + esc(later.join(' and ').toLowerCase()) + ' to <a href="mailto:' + REGISTRAR + '?subject=' + encodeURIComponent('Application documents (' + ref + ')') + '">' + REGISTRAR + '</a>, quoting your reference. ' : '') +
-      'Your application is complete once your transcripts and reference letters arrive, and the Academic Registrar will write to you about admission.</p>' +
+      (later.length ? 'Please email your ' + esc(listText(later).toLowerCase()) + ' to <a href="mailto:' + REGISTRAR + '?subject=' + encodeURIComponent('Application documents (' + ref + ')') + '">' + REGISTRAR + '</a>, quoting your reference. ' : '') +
+      'We’ve also emailed each of your referees a private link to submit their letter, and we’ll let you know as each one arrives. ' +
+      'Your application is complete once your transcripts and reference letters are in, and the Academic Registrar will write to you about admission.</p>' +
       '<dl class="af-facts"><div><dt>Your reference</dt><dd>' + esc(ref) + '</dd></div>' +
       '<div><dt>PayPal order</dt><dd>' + esc(paidOrderId) + '</dd></div></dl>' +
       '</div>');
