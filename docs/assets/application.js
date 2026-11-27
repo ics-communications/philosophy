@@ -105,14 +105,25 @@
 
   /* ── Draft (this device only; files are never stored) ────────────────────── */
 
+  // A draft is kept for 7 days after it was last changed, so answers (and any
+  // financial aid figures) don't sit on a shared computer indefinitely. A
+  // payment already taken survives expiry, so nobody is asked to pay twice.
   function loadDraft() {
-    try { return JSON.parse(localStorage.getItem(CONFIG.DRAFT_KEY)) || {}; } catch (e) { return {}; }
+    var DRAFT_DAYS = 7, d;
+    try { d = JSON.parse(localStorage.getItem(CONFIG.DRAFT_KEY)) || {}; } catch (e) { return {}; }
+    if (!d.savedAt || Date.now() - d.savedAt <= DRAFT_DAYS * 86400000) return d;
+    var kept = d.paidOrderId ? { ref: d.ref, paidOrderId: d.paidOrderId, paidFee: d.paidFee, savedAt: Date.now() } : null;
+    try {
+      if (kept) localStorage.setItem(CONFIG.DRAFT_KEY, JSON.stringify(kept));
+      else localStorage.removeItem(CONFIG.DRAFT_KEY);
+    } catch (e) { /* storage unavailable */ }
+    return kept || {};
   }
   var saveTimer;
   function saveDraft() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(function () {
-      var data = { ref: ref, paidOrderId: paidOrderId, paidFee: paidFee, fields: {}, education: readEducation(true), expenses: readExpenses(true) };
+      var data = { ref: ref, paidOrderId: paidOrderId, paidFee: paidFee, savedAt: Date.now(), fields: {}, education: readEducation(true), expenses: readExpenses(true) };
       $all('input[name], textarea[name], select[name]', form).forEach(function (el) {
         if (el.type === 'radio') { if (el.checked) data.fields[el.name] = el.value; }
         else if (el.type === 'checkbox') data.fields[el.name] = el.checked;
